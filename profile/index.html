@@ -7,7 +7,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
         <!-- title and favicon -->
-        <title>Book Clubs Chat App</title>
+        <title>My Profile</title>
         <link rel="icon" type="image/x-icon" href="/assets/alchemy-favicon.png" />
 
         <!-- js -->
@@ -15,7 +15,7 @@
             defer
             src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.7/dist/umd/supabase.min.js"
         ></script>
-        <script type="module" src="app.js"></script>
+        <script type="module" src="profile.js"></script>
 
         <!-- fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,18 +34,26 @@
     <body>
         <header class="page-header">
             <img class="logo" src="/assets/html_css_js.png" alt="logo" />
-            <h1 class="title">Book Clubs Chat App</h1>
+            <h1 class="title">My Profile</h1>
             <nav>
                 <a href="/">Home</a>
-                <a href="/profile-editor">Edit Profile</a>
-                <!-- <a href="/">Home</a> -->
-                <a id="sign-out-link" href="/auth/">Sign Out</a>
+                <a href="../">Back to profiles</a>
+                <a id="sign-out-link" href="../auth/">Sign Out</a>
             </nav>
         </header>
 
         <main>
-            <h2>All Book Clubs:</h2>
-            <section class="book-clubs-list"></section>
+            <img id="avatar-img" class="avatar" alt="avatar" src="/assets/avatar.jpeg" />
+            <h2 class="username-header"></h2>
+            <!-- <form class="message-form">
+                <label>
+                    <p>Post to <span class="username"></span>'s Message Feed</p>
+                    <input name="message" />
+                </label>
+                <button>Send message</button>
+            </form> -->
+
+            <div class="profile-detail"></div>
         </main>
     </body>
 </html>

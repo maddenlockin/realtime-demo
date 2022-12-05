@@ -28,48 +28,27 @@ export async function signOutUser() {
 }
 
 /* Data functions */
-// PROFILES DATA
-// export async function getProfiles() {
-//     return await client.from('profiles').select();
-// }
-
+// PROFILE DATA
+export async function getProfiles() {
+    const response = await client.from('profile').select();
+    return checkError(response);
+}
+// must use user_id here because there may not be a profile yet (there are work arounds for this, ex. require a profile on signup)
 export async function getProfile(user_id) {
-    const response = await client.from('profiles').select().match({ user_id }).maybeSingle();
+    const response = await client.from('profile').select('*').match({ user_id }).maybeSingle();
     return response;
+}
+export async function getProfileById(id) {
+    const response = await client.from('profile').select('*').match({ id }).single();
+    return checkError(response);
 }
 
 export async function upsertProfile(userId, profile) {
-    const response = await client.from('profiles').upsert(profile).single();
+    const response = await client.from('profile').upsert(profile).single();
 
     return checkError(response);
 }
 //----------//
-
-// export async function getBookClubs() {
-//     const response = await client.from('book_clubs').select('*, members(*)');
-//     return checkError(response);
-// }
-
-// export async function getClubRoom(id) {
-//     return await client
-//         .from('book_clubs')
-//         .select(
-//             `
-//             *,
-//             messages (
-//                 *,
-//                 profiles(
-//                     id,
-//                     username,
-//                     avatar_url
-//                 )
-//             )
-//         `
-//         )
-//         .eq('id', id)
-//         .order('created_at', { foreignTable: 'messages', ascending: false })
-//         .single();
-// }
 
 function checkError(response) {
     return response.error ? console.error(response.error) : response.data;
@@ -99,6 +78,30 @@ export async function uploadImage(imagePath, imageFile) {
     // https://nwxkvnsiwauieanvbiri.supabase.co/storage/v1/object/public/images/rooms/984829079656/Franky.jpeg
 
     return url;
+}
+
+export async function incrementStars(user_id) {
+    const profile = await getProfile(user_id);
+    console.log('profile', profile);
+    const response = await client
+        .from('profile')
+        .update({ stars: profile.data.stars + 1 })
+        .match({ user_id })
+        .select();
+
+    return checkError(response);
+}
+
+export async function decrementStars(user_id) {
+    const profile = await getProfile(user_id);
+
+    const response = await client
+        .from('profile')
+        .update({ stars: profile.data.stars - 1 })
+        .match({ user_id })
+        .select();
+
+    return checkError(response);
 }
 
 // export function onMessage(roomId, handleMessage) {

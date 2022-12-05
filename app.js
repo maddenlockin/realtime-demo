@@ -1,26 +1,27 @@
 /* Imports */
 // this will check if we have a user and set signout link if it exists
 import './auth/user.js';
-import { getBookClubs } from './fetch-utils.js';
-import { renderBookClub } from './render-utils.js';
+import { getProfiles } from './fetch-utils.js';
+import { renderProfile } from './render-utils.js';
 
 /* Get DOM Elements */
-const clubListEl = document.querySelector('.book-clubs-list');
+const listEl = document.querySelector('.book-clubs-list');
 
 /* State */
 
 /* Events */
-// window.addEventListener('load', async () => {
-//     await fetchAndDisplayBookClubs();
-// });
+window.addEventListener('load', async () => {
+    await fetchAndDisplayProfiles();
+});
 
-// /* Display Functions */
-// async function fetchAndDisplayBookClubs() {
-//     clubListEl.textContent = '';
+/* Display Functions */
+async function fetchAndDisplayProfiles() {
+    listEl.textContent = '';
 
-//     const bookclubs = await getBookClubs();
-//     for (let club of bookclubs) {
-//         const clubEl = renderBookClub(club);
-//         clubListEl.append(clubEl);
-//     }
-// }
+    const profiles = await getProfiles();
+    console.log('profiles', profiles);
+    for (let profile of profiles) {
+        const profileEl = renderProfile(profile);
+        listEl.append(profileEl);
+    }
+}

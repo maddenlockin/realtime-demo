@@ -43,29 +43,14 @@ avatarInput.addEventListener('change', () => {
     }
 });
 
-// profileForm2.addEventListener('submit', async (e) => {
-//     e.preventDefault();
-//     const formData = new FormData(profileForm);
-
-//     // initial profile update
-//     const profileObj = {
-//         username: formData.get('username'),
-//         bio: formData.get('bio'),
-//     };
-//     await upsertProfile(user.id, profileObj);
-// })
-
 profileForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    //---//
-    // niceties for "saving" and errors:
     // reset the error
     errorDisplay.textContent = '';
     // disabled button and change to "saving..."
     updateButton.disabled = true;
     updateButton.textContent = 'Saving...';
-    //---//
 
     // create a form data object for easy access to form values
     const formData = new FormData(profileForm);
@@ -73,6 +58,7 @@ profileForm.addEventListener('submit', async (e) => {
     // initial profile update
     const profileObj = {
         username: formData.get('username'),
+        bio: formData.get('bio'),
     };
 
     // get the avatar file from the form
@@ -89,7 +75,7 @@ profileForm.addEventListener('submit', async (e) => {
         profileObj.avatar_url = url;
     }
 
-    await upsertProfile(user.id, profileObj);
+    const response = await upsertProfile(user.id, profileObj);
 
     error = response.error;
 
