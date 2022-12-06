@@ -59,6 +59,7 @@ profileForm.addEventListener('submit', async (e) => {
     const profileObj = {
         username: formData.get('username'),
         bio: formData.get('bio'),
+        user_id: user.id,
     };
 
     // get the avatar file from the form
@@ -75,7 +76,7 @@ profileForm.addEventListener('submit', async (e) => {
         profileObj.avatar_url = url;
     }
 
-    const response = await upsertProfile(user.id, profileObj);
+    const response = await upsertProfile(profileObj);
 
     error = response.error;
 

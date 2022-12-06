@@ -28,30 +28,29 @@ export async function signOutUser() {
 }
 
 /* Data functions */
-// PROFILE DATA
-export async function getProfiles() {
-    const response = await client.from('profile').select();
-    return checkError(response);
-}
+
 // must use user_id here because there may not be a profile yet (there are work arounds for this, ex. require a profile on signup)
 export async function getProfile(user_id) {
-    const response = await client.from('profile').select('*').match({ user_id }).maybeSingle();
+    const response = await client.from('profiles').select('*').match({ user_id }).maybeSingle();
     return response;
 }
 export async function getProfileById(id) {
-    const response = await client.from('profile').select('*').match({ id }).single();
+    const response = await client.from('profiles').select('*, messages (*)').match({ id }).single();
     return checkError(response);
 }
 
-export async function upsertProfile(userId, profile) {
-    const response = await client.from('profile').upsert(profile).single();
-
+export async function getProfiles() {
+    const response = await client.from('profiles').select();
     return checkError(response);
 }
-//----------//
 
-function checkError(response) {
-    return response.error ? console.error(response.error) : response.data;
+export async function upsertProfile(profile) {
+    const response = await client
+        .from('profiles')
+        .upsert(profile, { onConflict: 'user_id' })
+        .single();
+    console.log('response', response);
+    return checkError(response);
 }
 
 export async function uploadImage(imagePath, imageFile) {
@@ -80,35 +79,40 @@ export async function uploadImage(imagePath, imageFile) {
     return url;
 }
 
-export async function incrementStars(user_id) {
-    const profile = await getProfile(user_id);
-    console.log('profile', profile);
+export async function incrementStars(id) {
+    const profile = await getProfileById(id);
+    console.log('profiles', profile);
     const response = await client
-        .from('profile')
-        .update({ stars: profile.data.stars + 1 })
-        .match({ user_id })
-        .select();
+        .from('profiles')
+        .update({ stars: profile.stars + 1 })
+        .match({ id });
 
     return checkError(response);
 }
 
-export async function decrementStars(user_id) {
-    const profile = await getProfile(user_id);
+export async function decrementStars(id) {
+    const profile = await getProfileById(id);
 
     const response = await client
-        .from('profile')
-        .update({ stars: profile.data.stars - 1 })
-        .match({ user_id })
-        .select();
+        .from('profiles')
+        .update({ stars: profile.stars - 1 })
+        .match({ id });
 
     return checkError(response);
 }
+export async function createMessage(message) {
+    return await client.from('messages').insert(message).single();
+}
 
-// export function onMessage(roomId, handleMessage) {
-//     client
-//         // what table and what rows are we interested in?
-//         .from(`messages:room_id=eq.${roomId}`)
-//         // what type of changes are we interested in?
-//         .on('INSERT', handleMessage)
-//         .subscribe();
-// }
+export function onMessage(handleMessage) {
+    client
+        // what table and what rows are we interested in?
+        .from(`messages`)
+        // what type of changes are we interested in?
+        .on('INSERT', handleMessage)
+        .subscribe();
+}
+
+function checkError(response) {
+    return response.error ? console.error(response.error) : response.data;
+}

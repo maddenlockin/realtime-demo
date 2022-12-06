@@ -1,4 +1,5 @@
 import {
+    createMessage,
     decrementStars,
     getProfile,
     getProfileById,
@@ -7,6 +8,8 @@ import {
 } from '../fetch-utils.js';
 import { renderMessagesEl } from '../render-utils.js';
 
+const form = document.querySelector('form');
+const usernameEl = document.querySelector('.username');
 const imgEl = document.querySelector('#avatar-img');
 const usernameHeaderEl = document.querySelector('.username-header');
 const profileDetailEl = document.querySelector('.profile-detail');
@@ -25,6 +28,24 @@ window.addEventListener('load', async () => {
     fetchAndDisplayProfile();
 });
 
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = new FormData(form);
+    const user = await getUser();
+    const fromUser = await getProfile(user.id);
+
+    console.log('fromUser', fromUser);
+    await createMessage({
+        text: data.get('message'),
+        from_user: fromUser.data.username,
+        recipient_id: id,
+    });
+
+    form.reset();
+    await fetchAndDisplayProfile();
+});
+
 async function fetchAndDisplayProfile() {
     profileDetailEl.textContent = '';
 
@@ -33,13 +54,15 @@ async function fetchAndDisplayProfile() {
     console.log('profile', profile);
     imgEl.src = profile.avatar_url;
     usernameHeaderEl.textContent = profile.username;
+    usernameEl.textContent = profile.username;
 
     const profileStars = renderStars(profile);
+    const messagesEl = renderMessagesEl(profile);
 
-    profileDetailEl.append(profileStars);
+    profileDetailEl.append(messagesEl, profileStars);
 }
 
-function renderStars({ stars, username, user_id }) {
+function renderStars({ stars, username, id }) {
     const p = document.createElement('p');
     const downButton = document.createElement('button');
     const upButton = document.createElement('button');
@@ -55,13 +78,13 @@ function renderStars({ stars, username, user_id }) {
     p.textContent = `${username} has ${stars} ⭐️`;
 
     downButton.addEventListener('click', async () => {
-        await decrementStars(user_id);
+        await decrementStars(id);
 
         await fetchAndDisplayProfile();
     });
 
     upButton.addEventListener('click', async () => {
-        await incrementStars(user_id);
+        await incrementStars(id);
 
         await fetchAndDisplayProfile();
     });
