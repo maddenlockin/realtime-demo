@@ -20,37 +20,53 @@ export function renderProfile(profileObject) {
 }
 
 export function renderMessagesEl(profile) {
-    const messagesEl = document.createElement('div');
-    const messagesHeader = document.createElement('h3');
+    const ul = document.createElement('ul');
+    const header = document.createElement('h3');
 
-    messagesHeader.textContent = `Message Feed for ${profile.username}`;
+    header.textContent = `Message Feed for ${profile.username}`;
 
-    messagesEl.classList.add('messages');
+    ul.classList.add('messages');
 
-    messagesEl.append(messagesHeader);
+    ul.append(header);
+    //for (let message of profile.messages)
+    // substitute "message" for "profile.messages[i]"
+    for (let i = 0; i < profile.messages.length; i++) {
+        console.log('i', profile.messages[i]);
+        const li = document.createElement('p');
+        li.classList.add('message');
 
-    for (let message of profile.messages) {
-        const messageEl = document.createElement('p');
-        const fromContainer = document.createElement('p');
-        const fromEl = document.createElement('p');
-        // const atEl = document.createElement('p');
-        const textEl = document.createElement('p');
+        const div = document.createElement('div');
+        div.classList.add('message-info');
 
-        fromEl.textContent = `${message.from_user}`;
-        // atEl.textContent = formatDate(message.created_at);
-        textEl.textContent = message.text;
+        // const img = document.createElement('img');
+        // img.classList.add('avatar');
+        // img.src = profile.avatar_url;
+        // img.alt = `${profile.messages[i].from_user} avatar`;
 
-        fromEl.classList.add('from');
-        textEl.classList.add('text');
-        // atEl.classList.add('at');
-        messageEl.classList.add('message');
+        const senderSpan = document.createElement('span');
+        senderSpan.classList.add('from');
+        senderSpan.textContent = profile.messages[i].from_user;
 
-        fromContainer.append(fromEl);
+        const dateSpan = document.createElement('span');
+        dateSpan.classList.add('created-date');
+        dateSpan.textContent = new Date(profile.messages[i].created_at).toLocaleString('en-US', {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+        });
 
-        messageEl.append(fromContainer, textEl);
+        const text = document.createElement('p');
+        text.classList.add('text');
+        text.textContent = profile.messages[i].text;
 
-        messagesEl.append(messageEl);
+        div.append(senderSpan, dateSpan);
+
+        li.append(div, text);
+
+        ul.append(li);
     }
 
-    return messagesEl;
+    return ul;
 }

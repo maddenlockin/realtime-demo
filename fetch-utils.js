@@ -29,6 +29,26 @@ export async function signOutUser() {
 
 /* Data functions */
 
+export async function getMessage(id) {
+    const response = await client
+        .from('messages')
+        // use aliasing & .eq instead of .match
+        .select(
+            `*,
+            user:profiles(
+                id,
+                username,
+                avatar_url
+            )
+        `
+        )
+        // could use .match({ id }) below instead
+        .eq('id', id)
+        .single();
+    console.log('getMessage response obj', response);
+    return response;
+}
+
 // must use user_id here because there may not be a profile yet (there are work arounds for this, ex. require a profile on signup)
 export async function getProfile(user_id) {
     const response = await client.from('profiles').select('*').match({ user_id }).maybeSingle();
@@ -101,13 +121,14 @@ export async function decrementStars(id) {
     return checkError(response);
 }
 export async function createMessage(message) {
-    return await client.from('messages').insert(message).single();
+    const response = await client.from('messages').insert(message).single();
+    return response;
 }
 
-export function onMessage(handleMessage) {
+export function onMessage(profileId, handleMessage) {
     client
         // what table and what rows are we interested in?
-        .from(`messages`)
+        .from(`messages:recipient_id=eq.${profileId}`)
         // what type of changes are we interested in?
         .on('INSERT', handleMessage)
         .subscribe();

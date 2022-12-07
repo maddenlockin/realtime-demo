@@ -5,6 +5,7 @@ import {
     getProfileById,
     getUser,
     incrementStars,
+    onMessage,
 } from '../fetch-utils.js';
 import { renderMessagesEl } from '../render-utils.js';
 
@@ -26,6 +27,11 @@ window.addEventListener('load', async () => {
         return;
     }
     fetchAndDisplayProfile();
+
+    onMessage(id, async (payload) => {
+        console.log('payload', payload);
+        fetchAndDisplayProfile();
+    });
 });
 
 form.addEventListener('submit', async (e) => {
@@ -33,17 +39,23 @@ form.addEventListener('submit', async (e) => {
 
     const data = new FormData(form);
     const user = await getUser();
-    const fromUser = await getProfile(user.id);
+    const senderProfile = await getProfile(user.id);
+    if (!senderProfile) {
+        //  No profile associated with this id, alert & redirect
+        alert('You must make your profile before you can message anyone');
+        location.assign('/');
+    } else {
+        await createMessage({
+            text: data.get('message'),
+            from_user: senderProfile.data.username,
+            recipient_id: id,
+            user_id: user.id,
+        });
 
-    console.log('fromUser', fromUser);
-    await createMessage({
-        text: data.get('message'),
-        from_user: fromUser.data.username,
-        recipient_id: id,
-    });
+        form.reset();
+    }
 
-    form.reset();
-    await fetchAndDisplayProfile();
+    // await fetchAndDisplayProfile();
 });
 
 async function fetchAndDisplayProfile() {
